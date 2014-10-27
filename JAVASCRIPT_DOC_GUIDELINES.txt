@@ -1,0 +1,68 @@
+1.) Add documented javascripts (*.js) to jsdoc_config.conf !!
+2.) Run javascriptdoc.bat from Windows 
+		(or build own script on another system see and use conf/jsdoc_config.conf)
+3.) Check warnings
+4.) See jsdoc/index.html and enjoy
+
+--------------------------------------
+Examples
+--------------------------------------
+
+
+Example:
+
+/** @namespace */
+var util = {
+    /**
+     * Repeat <tt>str</tt> several times.
+     * @param {string} str The string to repeat.
+     * @param {number} [times=1] How many times to repeat the string.
+   	 * @returns {string}
+     */
+    repeat: function(str, times) {
+        if (times === undefined || times < 1) {
+            times = 1;
+        }
+        return new Array(times+1).join(str);
+    }
+};
+
+See player.js for big example.
+
+
+--------------------------------------
+Basic tags
+--------------------------------------
+
+@fileOverview: marks a JSDoc comment that describes the whole file.
+@author: Who has written the variable being documented?
+@deprecated: indicates that the variable is not supported, any more. It is a good practice to document what to use instead.
+@example: contains a code example, illustrating how the given entity should be used.
+
+@see: points to a related resource.
+
+
+--------------------------------------
+Documenting functions and methods
+--------------------------------------
+
+@param {paramType} paramName description
+@returns {returnType} description
+@throws {exceptionType} description
+
+Examples:
+	@param {string} name
+	@param {string|number} idCode
+	@param {string[]} names
+	
+	@returns {Object}
+
+--------------------------------------
+Documenting variables and fields
+--------------------------------------
+
+--------------------------------------
+Documenting classes
+--------------------------------------
+
+excerpts from http://www.2ality.com/2011/08/jsdoc-intro.html
