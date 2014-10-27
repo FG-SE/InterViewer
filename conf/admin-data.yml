@@ -1,0 +1,6 @@
+# User
+ - &defaultadmin !!models.User
+    email: admin@admin.com
+    alias: admin
+    password: WP+5PIa+TH5hIzPYgj8/r9N/H5ep1dS7DgHg0ZYKBFQ=
+    admin: true

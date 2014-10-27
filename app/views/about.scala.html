@@ -1,0 +1,27 @@
+@import helper._
+
+@content = {	
+	<div class="row">    
+		<div class="col-md-6 col-md-offset-2">
+			<h1 id="welcomeText">Kontakt </h1>
+		</div>
+	</div>
+	
+	<div class="row">
+		<div class="col-md-6 col-md-offset-2">
+			<p style="font-size: 1em;line-height: 1.5em;margin-bottom: 1.2em;">
+			Entwickelt durch: Thiemo, Christian, Florian, Benedikt und Sven<br>
+			im Rahmen des Software-Projekts des Fachgebietes Software Engineering der Leibniz Universit&auml;t Hannover.<br>
+			</p>
+			<h3>Dokumentation</h3>
+			<span class="glyphicon glyphicon-export"></span> <a href="@(routes.Assets.at("Bedienungsanleitung.pdf"))" target="_blank">Bedienungsanleitung (pdf)</a>
+		</div>
+	</div>
+}
+@header = {
+	@if(Logins.isLoggedIn()){
+		<li><a href="@routes.Projects.index()">Projekte</a></li>
+	}
+}
+
+@main("InterViewer Kontakt")(content, header)

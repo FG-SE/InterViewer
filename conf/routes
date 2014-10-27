@@ -1,0 +1,44 @@
+# Routes
+# This file defines all application routes (Higher priority routes first)
+# ~~~~
+
+# Home page
+GET		/							controllers.Projects.index()
+GET		/login						controllers.Logins.login()
+POST	/login						controllers.Logins.authenticateUser()
+GET		/logout						controllers.Logins.logout()
+GET		/about						controllers.Logins.about()
+
+GET     /admin                      controllers.Admins.index()
+POST    /admin/add                  controllers.Admins.addUser()
+POST    /admin/edit                 controllers.Admins.editUser()
+POST    /admin/delete               controllers.Admins.deleteUser()
+GET     /admin/delall               controllers.Admins.deleteAllUser()
+POST    /admin/reload		        controllers.Admins.getUser()
+POST    /admin/sqlquery	            controllers.Admins.performSqlQueryMustache()
+
+POST	/projects/add				controllers.Projects.addProject()
+GET		/projects/getAllUserNames	controllers.Projects.getAllUserNames()
+POST	/projects/getInfo			controllers.Projects.getInfo()
+POST	/projects/editProject		controllers.Projects.editProject()
+POST	/projects/deleteProject		controllers.Projects.deleteProject()
+
+GET		/editor						controllers.Statements.editor()
+GET		/editor/getAudio			controllers.Statements.getAudio()
+POST	/editor/addStatement		controllers.Statements.addStatement()
+GET		/editor/getStatement/:id	controllers.Statements.getStatement(id:String)
+POST	/editor/removeStatement/:id	controllers.Statements.removeStatement(id:String)
+POST	/editor/saveStatement		controllers.Statements.saveStatement()
+
+GET		/interviews					controllers.Interviews.getAllInterviews()
+POST	/addInterview				controllers.Interviews.addInterview()
+POST	/removeInterview			controllers.Interviews.removeInterview()
+GET		/getInterviewInfo/:id		controllers.Interviews.getInterviewInfo(id:String)
+POST	/editInterview				controllers.Interviews.editInterview()
+
+GET		/codes						controllers.Codes.index()
+
+GET		/exportProject/:id			controllers.Projects.exportProject(id:String)
+
+# Map static resources from the /public folder to the /assets URL path
+GET     /assets/*file               controllers.Assets.at(path="/public", file)

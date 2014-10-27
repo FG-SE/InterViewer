@@ -1,0 +1,40 @@
+@(email: String, password: String, message: String)
+@import helper._
+
+@content = {	
+	<div class="row">    
+		<div class="col-md-6 col-md-offset-2">
+			<h1 id="welcomeText">Willkommen bei InterViewer</h1>
+			<p>Melden Sie sich an.</p>
+		</div>
+	</div>
+	
+	<div class="row">
+		<div class="col-md-6 col-md-offset-2">
+			<p id="errorMessage" class="text-danger">
+				@message
+			</p>
+		</div>
+	</div>
+	
+	<div class="row">
+		<div class="col-md-6 col-md-offset-2">
+			<h2>Anmeldung</h2>
+			<form class="form-inline" role="form" method="POST" action="@routes.Logins.authenticateUser()">
+			  <div class="form-group">
+			    <label class="sr-only" for="email">E-mail-Adresse/Alias</label>
+			    <input type="text" class="form-control" id="email" name="email" placeholder="Email oder Alias" value="@(email)">
+			  </div>
+			  <div class="form-group">
+			    <label class="sr-only" for="password">Passwort</label>
+			    <input type="password" class="form-control" id="password" name="password" placeholder="Passwort" value="@(password)">
+			  </div>
+			  <button type="submit" class="btn btn-default">Anmelden</button>
+			</form>
+		</div>
+	</div>
+}
+@header = {
+}
+
+@main("InterViewer Anmeldung")(content, header)

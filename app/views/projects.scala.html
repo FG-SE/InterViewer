@@ -1,0 +1,335 @@
+@(message: String, projects: List[Project])
+
+
+@content = {	
+		<script type="text/javascript" src="@routes.Assets.at("javascripts/projects.js")"></script>
+	  
+	    <script lang="text/javascript">
+	    	$(document).ready(function() {
+	    		projects.init("@routes.Projects.getAllUserNames", "@routes.Projects.addProject", "@routes.Projects.editProject", "@routes.Projects.deleteProject", "@routes.Projects.getInfo");
+	    	});
+		</script>
+
+		<div id="projectInfoModalContainer"></div>
+		<div id="projectAddModalContainer"></div>
+		<div id="projectEditModalContainer"></div>
+
+		<div class="table-responsive">
+		
+			<table id="projectTable" class="table table-hover table-striped">
+			<thead>
+				<tr>
+					<th>Projekte</th>
+					<th><button class="pull-right btn btn-primary" href="javascript:;" id="projectAdd"><span class="glyphicon glyphicon-plus"></span> Neues Projekt</button></th>
+				</tr>
+			</thead>
+			@for(project <- projects){
+			<tr id="@(project.getId())">
+				<td>
+					<a href="interviews?projectId=@(project.getId())">@(project.getName())</td>
+				<td>
+					<div class="btn-group pull-right">
+						<button type="button" onClick="location.href='@routes.Projects.exportProject(project.getId().toString())'" title="Projekt exportieren" class="btn btn-default">
+							<span class="glyphicon glyphicon-export"></span>
+						</button>
+					
+						<button type="button" id="projectInfo" onClick="projects.sendShowInfo($(this).closest('tr').attr('id'))" title="Informationen anzeigen" class="btn btn-default">
+							<span class="glyphicon glyphicon-info-sign"></span>
+						</button>
+						
+						<button type="button" onClick="projects.getEditProject($(this).closest('tr').attr('id'))" title="Projekt-Eigenschaften bearbeiten" class="btn btn-default">
+							<span class="glyphicon glyphicon-edit"></span>
+						</button>
+						
+						<button type="button" onClick = "projects.sendDeleteProject($(this).closest('tr').attr('id'));" title="Projekt l&ouml;schen" class="btn btn-default">
+							<span class="glyphicon glyphicon-trash"></span>
+						</button>
+					</div>
+				</td>
+			</tr>
+			}
+			</table>
+		</div>
+
+	<script id="projectInfoTemplate" type="text/template">
+		<!-- Project Info Modal -->
+		<div class="modal fade" id="projectInfoTemplateModal">
+			<div class="modal-dialog">
+				<div class="modal-content">
+					<div class="modal-header">
+						<button type="button" class="close" data-dismiss="modal" aria-hidden="true">&times;</button>
+						<h4 class="modal-title">Projekt Informationen</h4>
+					</div>
+					
+					<div class="modal-body">
+						<form class="form-horizontal" role="form">
+							<div class="form-group">
+								<label class="col-md-4 control-label">Projekt Name</label>
+								<div class="col-md-6 table-content">
+									{{Name}}
+								</div>
+							</div>
+							
+							<div class="form-group">
+								<label class="col-md-4 control-label">Benutzer</label>
+								<div class="col-md-6 table-content">
+									<ul class="list-unstyled">
+										{{#Users}}
+											
+												{{#ProjectMember}}
+													<li>{{Alias}}</li>
+												{{/ProjectMember}}
+											
+										{{/Users}}
+									</ul>
+								</div>
+							</div>
+							
+							<div class="form-group">
+								<label class="col-md-4 control-label">Eigenschaftsfelder f&uuml;r Interviews</label>
+								<div class="col-md-6 table-content">
+									<ul class="list-unstyled">
+										{{#Properties}}
+											<li>{{Name}}</li>
+										{{/Properties}}
+									</ul>
+								</div>
+							</div>
+							
+							<div class="form-group">
+								<label class="col-md-4 control-label">Export</label>
+								<div class="col-md-6 table-content">
+								<a href="{{Link}}">
+									<button id="infoProjectExport" type="button" class="btn btn-default">
+										<span  id="InfoModalProperty1 btn-lg" class="glyphicon glyphicon-export"></span> Projekt exportieren
+									</button>
+									</a>
+								</div>
+							</div>
+							
+						</form>
+					</div>
+					<div class="modal-footer">
+						<button id="projectInfoSubmitBtn" type="button" data-dismiss="modal" class="btn btn-primary">Fertig</button>
+					</div>
+				</div><!-- /.modal-content -->
+			</div><!-- /.modal-dialog -->
+		</div><!-- /.modal -->
+	</script>
+	
+	
+	<script id="projectEditTemplate" type="text/template">
+		<!-- Edit Project Modal -->
+		<div class="modal fade" id="projectEditTemplateModal">
+			<div class="modal-dialog">
+				<div class="modal-content">
+					<div class="modal-header">
+						<button type="button" class="close" data-dismiss="modal" aria-hidden="true">&times;</button>
+						<h4 class="modal-title">Projekt bearbeiten</h4>
+					</div>
+					<div class="modal-body">
+						<form class="form-horizontal" role="form">
+							<div class="form-group">
+								<input id="editProjectId" type="hidden" value="{{Id}}">
+								<label class="col-md-4 control-label">Projekt Name</label>
+								<div class="col-md-7 table-content">
+									<input type="text" class="form-control" id="editProjectName" placeholder="Name" value="{{Name}}">
+								</div>
+							</div>
+							
+							<div class="form-group table-content">
+								<label class="col-md-4 control-label">Benutzer</label>
+								<div class="col-md-3 table-content">
+									<label>M&ouml;gliche</label>
+									<select id="editProjectUsers" multiple class="form-control">
+										{{#Users}}
+										{{^ProjectMember}}
+											<option value="{{Id}}">{{Alias}}</option>
+										{{/ProjectMember}}
+										{{/Users}}
+									</select>
+								</div>
+								<div class="col-md-1 table-content">
+									<label>&harr;</label>
+									<a href="javascript:;" onclick="projects.modalAddSelectedUsers('select#editProjectUsers', 'select#editProjectUsersSelected')">&rarr;</a><br>
+									<a href="javascript:;" onclick="projects.modalRemoveSelectedUsers('select#editProjectUsers', 'select#editProjectUsersSelected')">&larr;</a>
+								</div>
+								<div class="col-md-3 table-content">
+									<label>Zugeh&ouml;rige</label>
+									<select id="editProjectUsersSelected" multiple class="form-control">
+										{{#Users}}
+										{{#ProjectMember}}
+											<option value="{{Id}}">{{Alias}}</option>
+										{{/ProjectMember}}
+										{{/Users}}
+									</select>
+								</div>
+							</div>
+
+							<div class="form-group">
+								<label class="col-md-4 control-label">Eigenschaften 
+									<span id="editPropertyHelp" data-toggle="tooltip" data-original-title="Eigenschaften k&ouml;nnen durch die beiden Button sowohl zur Liste hinzugef&uuml;gt als auch von dieser entfernt werden." class="glyphicon glyphicon-question-sign"></span>
+								</label>
+								<div class="row table-content">
+									<div class="col-md-7">
+										<div class="input-group">
+											<input type="text" class="form-control" placeholder="Neue Eigenschaft">
+											<span class="input-group-btn">
+												<button id="saveProperty" class="btn btn-default" type="button"><span class="glyphicon glyphicon-ok"></span></button>
+												<button id="deleteProperty" type="button" class="btn btn-default">
+													<span  id="InfoModalProperty1 btn-lg" class="glyphicon glyphicon-remove"></span>
+												</button>
+											</span>
+											
+										</div>
+
+										<select id="editProjectProperties" multiple class="form-control selectMargin">
+											{{#Properties}}
+												<option value="{{Name}}">{{Name}}</option>
+											{{/Properties}}
+										</select>
+									</div>
+								</div>
+							</div>
+						</form>
+					</div>
+					<div class="modal-footer">
+						<button type="button" class="btn btn-default" data-dismiss="modal">Abbrechen</button>
+						<button id="saveProject" type="button" class="btn btn-primary">Speichern</button>
+					</div>
+				</div><!-- /.modal-content -->
+			</div><!-- /.modal-dialog -->
+		</div><!-- /.modal -->
+		
+	</script>
+		
+	<script id="projectAddTemplate" type="text/template">
+		<!-- Add Project Modal -->
+		<div class="modal fade" id="projectAddTemplateModal" tabindex="-1" role="dialog" aria-labelledby="projectAddModalLabel" aria-hidden="true">
+			<div class="modal-dialog">
+				<div class="modal-content">
+					<div class="modal-header">
+						<button type="button" class="close" data-dismiss="modal" aria-hidden="true">&times;</button>
+						<h4 class="modal-title" id="projectAddModalLabel">Neues Projekt erstellen</h4>
+					</div>
+					
+					<div class="modal-body">
+						<form id="newProjectForm" class="form-horizontal" onsubmit="$('#saveProject').click(); return false;" role="form" >
+							<div class="form-group">
+								<label class="col-md-4 control-label">Projektname</label>
+								<div class="col-md-7 table-content">
+									<input type="text" class="form-control" id="newProjectName" placeholder="Name" value="">
+								</div>
+							</div>
+							
+							<div class="form-group">
+								<label class="col-md-4 control-label">Benutzer</label>
+								<span id="addProjectUserWarning" style="color:red;display:none" class="table-content">Sie k&ouml;nnen nicht alle Benutzer entfernen.</span>
+								<div class="col-md-3 table-content">
+									<label>M&ouml;gliche</label>
+									<select id="addProjectUsers" multiple class="form-control">
+										{{#Users}}
+											{{^currentUser}}
+												<option value="{{Id}}">{{Alias}}</option>
+											{{/currentUser}}
+										{{/Users}}
+									</select>
+								</div>
+								<div class="col-md-1 table-content">
+									<label>&harr;</label>
+									<a href="javascript:;" onclick="projects.modalAddSelectedUsers('select#addProjectUsers', 'select#addProjectUsersSelected')">&rarr;</a><br>
+									<a href="javascript:;" onclick="projects.modalRemoveSelectedUsers('select#addProjectUsers', 'select#addProjectUsersSelected')">&larr;</a>
+								</div>
+								<div class="col-md-3 table-content">
+									<label>Zugeh&ouml;rige</label>
+									<select id="addProjectUsersSelected" multiple class="form-control">
+										{{#Users}}
+											{{#currentUser}}
+												<option value="{{Id}}">{{Alias}}</option>
+											{{/currentUser}}
+										{{/Users}}
+									</select>
+								</div>
+							</div>
+							
+							<div class="form-group">
+								<label class="col-md-4 control-label">Eigenschaften 
+									<span id="addPropertyHelp" data-toggle="tooltip" data-original-title="Eigenschaften k&ouml;nnen durch die beiden Button sowohl zur Liste hinzugef&uuml;gt als auch von dieser entfernt werden." class="glyphicon glyphicon-question-sign"></span>
+								</label>
+								<div class="row table-content">
+									<div class="col-md-7">
+										<div class="input-group">
+											<input type="text" class="form-control" placeholder="Neue Eigenschaft">
+											<span class="input-group-btn">
+												<button id="saveProperty" class="btn btn-default" type="button"><span class="glyphicon glyphicon-ok"></span></button>
+												<button id="deleteProperty" type="button" class="btn btn-default">
+													<span  id="InfoModalProperty1 btn-lg" class="glyphicon glyphicon-remove"></span>
+												</button>
+											</span>
+										</div>
+										<select id="addProjectProperties" multiple class="form-control showNot selectMargin"></select></div>
+								</div>
+							</div>
+						</form>
+					</div>
+					
+					<div class="modal-footer">
+						<button type="button" class="btn btn-default" data-dismiss="modal">Abbrechen</button>
+						<button id="saveProject" type="button" class="btn btn-primary">Speichern</button>
+					</div>
+				</div><!-- /.modal-content -->
+			</div><!-- /.modal-dialog -->
+		</div><!-- /.modal -->
+	
+	</script>
+	
+	<script id="rowTemplate" type="text/template">
+		<tr id="{{Id}}" class="showNot">
+				<td>
+					<a href="interviews?projectId={{Id}}">{{Name}}</td>
+				<td>
+					<div class="btn-group pull-right">
+						<button type="button" onClick="location.href='{{Link}}'" title="Projekt exportieren" class="btn btn-default">
+							<span class="glyphicon glyphicon-export"></span>
+						</button>
+
+						<button type="button" id="projectInfo" onClick="projects.sendShowInfo($(this).closest('tr').attr('id'))" class="btn btn-default">
+							<span class="glyphicon glyphicon-info-sign"></span>
+						</button>
+						
+						<button type="button" onClick="projects.getEditProject($(this).closest('tr').attr('id'))" class="btn btn-default">
+							<span class="glyphicon glyphicon-edit"></span>
+						</button>
+						
+						<button type="button" onClick = "projects.sendDeleteProject($(this).closest('tr').attr('id'));" class="btn btn-default">
+							<span class="glyphicon glyphicon-trash"></span>
+						</button>
+					</div>
+				</td>
+			</tr>
+	</script>
+		
+		<script lang="text/javascript">
+		
+			
+		</script>
+		
+		<style>
+			.table-content {
+				padding-top: 7px;
+			}
+			
+			select.selectMargin {
+				margin-top: 1em;
+			}
+			
+			.showNot {
+				display: none;
+			}
+		</style>
+}
+@header = {
+	<li class="active">Projekte</li>
+}
+
+@main("InterViewer Projekt\u00fcbersicht")(content, header)

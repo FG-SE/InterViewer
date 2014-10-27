@@ -1,0 +1,50 @@
+@(project: Project, codes: List[Code], statements: List[List[Statement]])
+
+
+@content = {
+	<h2>Codes in @project.getName()</h2>
+	<div class="panel panel-default">
+		@for(code <- codes) {
+		<div class="panel-heading" onClick="$(this).next().slideToggle()" style="cursor:pointer;">
+			@code.getName()
+			<span class="badge pull-right">@statements.get(codes.lastIndexOf(code)).size()</span>
+		</div>
+		<div style="display:none;"  class="panel-body">
+			<table class="table table-hover">
+				<thead>
+					<tr><th>Zeit</th><th>Beschreibung</th><th>Interview</th></tr>
+				</thead>
+				<tbody>
+			@for(statement <- statements.get(codes.lastIndexOf(code))){
+						<tr style="cursor:pointer" onclick="document.location = '@routes.Statements.editor()?interviewId=@statement.getParentId()'">
+							<td>
+								@statement.getTime().toString()
+							</td>
+							<td>
+									@statement.getDescription()
+							</td>
+							<td>
+								@statement.getInterview().getName()
+							</td>
+						</tr>
+			}
+		<div style="display:none;" class="panel-body list-group">
+				@for(statement <- statements.get(codes.lastIndexOf(code))){
+					<a class="list-group-item text-primary" href="@routes.Statements.editor()?interviewId=@statement.getParentId()">@statement.getDescription()</a>
+				}
+				</tbody>
+			</table>
+		</div>
+		}
+	</div>
+}
+
+
+@navbar = {
+	<li><a href="@routes.Projects.index()">Projekte</a></li>
+	<li><a href="interviews?projectId=@(project.getId())">Interviews</a></li>
+	<li class="active">Codes</li>
+	
+}
+
+@main("InterViewer Codes Zusammenstellung")(content, navbar)

@@ -1,0 +1,223 @@
+@(message: String, project : models.Project)
+
+@content = {
+	<!-- This json contains the property types for this project -->
+	<script>
+	var propertytypes = {
+		properties : [
+			@for(propType <- project.getPropertyTypes()){
+				{
+				propertyType: "@propType.getName()"
+				},
+			}
+			]				
+		};
+	</script>
+
+	<!-- GUI-Logic is contained in editor.js using editor namespace.
+       	Call init on startup to initialize event-handlers -->        
+    <script type="text/javascript" src="@routes.Assets.at("javascripts/interviews.js")"></script>
+    
+    <script lang="text/javascript">
+		$(document).ready(function() {
+			interviews.init();
+		});
+	</script>
+	
+	<!-- Ajax-Routes Configuration. interviews.js will search for id "ajaxroutes" -->
+	<div id="ajaxroutes"
+	data-removeinterview="@routes.Interviews.removeInterview"
+	data-addinterview="@routes.Interviews.addInterview"
+	data-editinterview="@routes.Interviews.editInterview"
+	</div>
+	
+	<!-- The HTML Content follows... -->
+	
+	<!-- little position adjustment -->
+	<style>
+			.table-content {
+				padding-top: 7px;
+			}
+	</style>
+	
+	<!-- the table -->
+	<table id="interviewsTable" class="table table-hover table-striped">
+		<thead>
+			<tr>
+				<th>Projekt: @project.getName()</th>
+				<th><button id="interviewAddButton" class="btn btn-primary pull-right"><span class="glyphicon glyphicon-plus"></span> Neues Interview</button></th>
+			</tr>
+		</thead>
+		<tbody>
+		@for(interview <- project.getInterviews()){
+			<tr id="@interview.getId()">
+				<td>
+					@if(interview.getAudio() == null){
+						@interview.getName() &nbsp;&nbsp; <span class="label label-danger">Keine Audiodatei</span>
+					}else{	
+						<a href="@routes.Statements.editor()?interviewId=@interview.getId()">@interview.getName()</a>
+					}
+				</td>
+				<td>
+					<div class="btn-group pull-right">
+  						<button type="button" class="btn btn-default interviewInfo" data-interviewid="@(interview.getId())">
+							<span class="glyphicon glyphicon-info-sign"></span>
+						</button>  						
+  						<button type="button" class="btn btn-default interviewEdit" data-interviewid="@(interview.getId())">
+  							<span class="glyphicon glyphicon-edit"></span>
+  						</button>
+ 						<button type="button" class="btn btn-default interviewRemove" data-interviewid="@(interview.getId())">
+ 							<span class="glyphicon glyphicon-trash"></span>
+ 						</button>
+					</div>
+				</td>
+			</tr>
+		}
+		</tbody>
+	</table>
+	
+	<!-- modals for editing and info are rendered here-->
+	<div id="modalContainer"></div>
+	
+	<!-- Mustache template for adding and editing interviews-->
+	<script id="interviewAddTemplate" type="text/template">
+	<!-- rendered mustache for adding and editing interviews-->
+	<div class="modal fade" id="interviewAdd">
+		<div class="modal-dialog">
+    		<div class="modal-content">
+	      		<div class="modal-header">
+        			<button type="button" class="close" data-dismiss="modal" aria-hidden="true">&times;</button>
+        			<h4 class="modal-title">{{headline}}</h4>
+      			</div>
+      			<div class="modal-body">
+	        		<form id="interviewForm" enctype="multipart/form-data" onsubmit="$('#saveInterview').click(); return false;" class="form-horizontal" role="form">
+						<input type="hidden" name="projectId" value="@(project.getId())"></input>
+						{{#interviewId}}
+							<input type="hidden" name="interviewId" value="{{interviewId}}"></input>
+						{{/interviewId}}
+						<div class="form-group">
+						<label class="col-sm-4 control-label">Interview Name</label>
+								<div class="col-sm-6">
+									<input type="text" name="interviewName" id="interviewName" class="form-control" placeholder="Interviewname" value="{{interviewName}}">
+								</div>
+						</div>
+						<div class="form-group">
+							<label class="col-sm-4 control-label">Audio</label>
+								<div class="col-sm-6">
+									{{^audio}}
+									<input type="file" name="audio" id="audio">
+									{{/audio}}
+									{{#audio}}
+									<p class="help-block">Aktuelle Datei: {{audio}}</p>
+									{{/audio}}
+								</div>
+						</div>
+						
+						<!-- Read all the property types from this project and show for each type an input field-->
+						{{#properties}}
+						<div class="form-group">
+							<label class="col-sm-4 control-label">{{propertyType}}</label>
+								<div class="col-sm-6">
+									<input type="text" name="{{propertyType}}" id="{{propertyType}}" class="propertyType form-control" value="{{value}}">
+								</div>
+						</div>
+						{{/properties}}
+					</form>
+      			</div>
+      			<div class="modal-footer">
+	        		<button type="button" class="btn btn-default" data-dismiss="modal">Abbrechen</button>
+        			<button id="saveInterview" type="button" class="btn btn-primary" data-loading-text="uploading...">Speichern</button>
+      			</div>
+			</div>
+    	</div>
+	</div>
+	</script>
+	
+
+	<!-- Mustache template for info of interviews-->
+	<script id="interviewInfoTemplate" type="text/template">
+	<!-- Rendered Mustache template for info of interviews-->
+	<div class="modal fade" id="interviewInfo">
+		<div class="modal-dialog">
+	    	<div class="modal-content">
+      			<div class="modal-header">
+	        		<button type="button" class="close" data-dismiss="modal" aria-hidden="true">&times;</button>
+        			<h4 class="modal-title">Interview-Informationen</h4>
+      			</div>
+      			<div class="modal-body">
+	        		<form class="form-horizontal" role="form">
+						<div class="form-group">
+							<label class="col-sm-4 control-label">Interview Name</label>
+							<div class="col-sm-6 table-content">
+								{{interviewName}}
+							</div>
+	
+						</div>
+						<div class="form-group">
+							<label class="col-sm-4 control-label">Audio</label>
+								<div class="col-sm-6 table-content">
+									{{^audio}}
+										Noch keine Audiodatei hochgeladen
+									{{/audio}}
+	
+									{{#audio}}
+										Aktuelle Datei: {{audio}}
+									{{/audio}}
+								</div>
+						</div>
+						
+						<!-- Read all property types from this project and show the related values-->
+						{{#properties}}
+						<div class="form-group">
+							<label class="col-sm-4 control-label">{{propertyType}}</label>
+								<div class="col-sm-6 table-content">
+									{{value}}
+								</div>
+						</div>
+						{{/properties}}
+					</form>
+      			</div>
+      			<div class="modal-footer">
+	        		<button type="button" class="btn btn-primary" data-dismiss="modal">Fertig</button>
+      			</div>
+			</div>
+    	</div>
+	</div>
+	</script>
+	
+	<!-- Mustache template interview table rows-->
+	<script id="interviewRowTemplate" type="text/template">
+	<!-- Rendered Mustache template interview table rows-->
+	<tr id="{{interviewId}}">
+		<td>
+			{{^audio}}
+				{{interviewName}} &nbsp;&nbsp; <span class="label label-danger">Keine Audiodatei</span>
+			{{/audio}}
+			{{#audio}}
+				<a href="@routes.Statements.editor()?interviewId={{interviewId}}">{{interviewName}}</a>
+			{{/audio}}
+		</td>
+		<td>
+			<div class="btn-group pull-right">
+	  			<button type="button" class="btn btn-default interviewInfo" data-interviewid="{{interviewId}}">
+					<span class="glyphicon glyphicon-info-sign"></span>
+				</button>  						
+  				<button type="button" class="btn btn-default interviewEdit" data-interviewid="{{interviewId}}">
+	  				<span class="glyphicon glyphicon-edit"></span>
+  				</button>
+ 				<button type="button" class="btn btn-default interviewRemove" data-interviewid="{{interviewId}}">
+	 				<span class="glyphicon glyphicon-trash"></span>
+ 				</button>
+			</div>
+		</td>
+	</tr>
+	</script>
+}
+
+@header = {
+	<li><a href="@routes.Projects.index()">Projekte</a></li>
+	<li class="active">Interviews</li>
+	<li><a href="codes?projectId=@(project.getId())">Codes</a></li>
+}
+
+@main("InterViewer Interview\u00fcbersicht")(content, header)

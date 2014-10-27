@@ -1,0 +1,154 @@
+@(message: String, users: List[User])
+
+@import helper._
+@import util._
+
+@content = {
+	<!-- Tablesort: http://mottie.github.io/tablesorter/docs/ -->
+	<link rel="stylesheet" media="screen" href="@routes.Assets.at("stylesheets/tablesorter.css")">
+    <script type="text/javascript" src="@routes.Assets.at("javascripts/jquery.tablesorter.min.js")"></script> 
+    <script type="text/javascript" src="@routes.Assets.at("javascripts/jquery.tablesorter.pager.js")"></script> 
+    <script type="text/javascript" src="@routes.Assets.at("javascripts/jquery.metadata.js")"></script>
+        
+    <!-- GUI-Logic is contained in admins.js using admins namespace.
+       	Call init on startup to initialize event-handlers -->        
+    <script type="text/javascript" src="@routes.Assets.at("javascripts/admins.js")"></script>
+  
+    <script lang="text/javascript">
+					$(document).ready(function() {
+						admins.init();
+					});
+				</script>
+	
+	<!-- Ajax-Routes Configuration. admins.js will search for id "ajaxroutes" -->
+	<div id="ajaxroutes"
+	data-saveedits="@routes.Admins.editUser"
+	data-addnewuser="@routes.Admins.addUser"
+	data-reloaduserinfo="@routes.Admins.getUser"
+	data-deleteuser="@routes.Admins.deleteUser"
+	data-performsqlquery="@routes.Admins.performSqlQueryMustache"></div>
+	
+	
+	<!-- The HTML Content follows... -->
+	<h1> Administration </h1>
+	@message
+  
+    
+	<button id="userAddButton" class="btn btn-primary pull-right newUser"><span class="glyphicon glyphicon-plus"></span> Neuer Nutzer</button>
+	<h3>Benutzerverwaltung</h3>
+	
+	<div class="table-responsive">
+		<table id="usertable" class="tablesorter table table-hover table-condensed table-bordered" style="table-layout:fixed;">
+		<colgroup>
+			<col width="10%">
+			<col width="25%">
+			<col width="25%">
+			<col width="25%">
+			<col>
+			<col width="100px">
+		</colgroup>
+  		<thead>
+			<tr>
+			<th class="{sorter: 'integer'}">User-ID</th>
+			<th>Alias</th>
+			<th>E-Mail-Adresse</th>
+			<th>Passwort</th>
+			<th>Admin</th>
+			<th></th>
+			</tr>
+		</thead>
+		<tbody id="usertablebody">
+		@for(user <- users){
+		<tr id="user@(user.getId())">
+			<td>@user.getId()</td>
+			<td id="@(user.getId())alias">@user.getAlias()</td>
+			<td id="@(user.getId())email">@user.getEmail()</td>
+			<td id="@(user.getId())password">**********</td>
+			<td id="@(user.getId())admin">
+			@if(user.isAdmin()){
+				<input id="@(user.getId())admininput" type="checkbox" disabled="disabled" checked="checked">
+			} else{
+				<input id="@(user.getId())admininput" type="checkbox" disabled="disabled">
+			}	
+			</td>
+			<td id="@(user.getId())function">
+				<button type="button" title="Nutzer-Eigenschaften bearbeiten" class="btn btn-default btn-xs editUser" data-userid="@(user.getId())">
+					<span class="glyphicon glyphicon-edit"></span>
+				</button>
+				<button type="button" title="Nutzer l&ouml;schen" class="btn btn-default btn-xs deleteUser" data-userid="@(user.getId())">
+					<span class="glyphicon glyphicon-trash"></span>
+				</button>
+				<img style="visibility:hidden; text-align:right;" id="@(user.getId())wait" height="25px" src="/assets/images/warte.gif">
+			</td>
+			</tr>
+		}
+		</tbody>
+		</table>
+	</div>
+	
+	<h3>Technische Dokumentation</h3>
+	
+	<p>
+		<span class="glyphicon glyphicon-export"></span> <a href="@(routes.Assets.at("TechnischeDokumentation.pdf"))">Technische Dokumentation (pdf)</a>
+	</p>
+	<p>
+		<span class="glyphicon glyphicon-export"></span> <a href="@(routes.Assets.at("Testdokumentation.pdf"))">Testdokumentation (pdf)</a>
+	</p>
+	<p>
+		<span class="glyphicon glyphicon-export"></span> <a href="@(routes.Assets.at("doc.zip"))">Dokumentation der Server-Anwendung (javadoc zip)</a>
+	</p>
+	<p>
+		<span class="glyphicon glyphicon-export"></span> <a href="@(routes.Assets.at("jsdoc.zip"))">Dokumentation der Client-Anwendung (jsdoc zip)</a>
+	</p>
+	<h3>SQL-Anfragen</h3>
+	
+    <div class="input-group">
+      	<input id="sqlInputField" type="text" class="form-control" value="select table_name, column_name, type_name from information_schema.columns">
+      	<span class="input-group-btn">
+        	<button id="performSqlQuery" class="btn btn-primary pull-right performSqlQuery">SQL-Anfrage ausführen</button>
+      	</span>
+      			
+      	<span class="input-group-btn">
+       		<button id="exportSqlResponse" class="btn btn-primary exportSqlResponse hidden"><span class="glyphicon glyphicon-export"></span></button>
+     	 </span>
+    </div>
+	
+	<div id="sqlResponseTableDiv">
+		<!-- Template is rendered here -->	
+	</div>
+
+	<!-- ... end of regular HTML-content -->
+	
+	<!-- MUSTACHE TEMPLATE FOR RENDERING OF SQL RESPONSES -->
+	<script id="sqlResponseTableTemplate" type="text/template"
+		>
+	<!-- SQL Response Table -->	
+	<table id="usertable" class="tablesorter table table-hover table-condensed table-bordered" style="table-layout:fixed;">
+		<thead>
+			<tr>
+				{{#keys}}
+ 				<th>{{key}}</th>
+				{{/keys}}
+			</tr>
+		</thead>
+		<tbody>
+			{{#valueRows}}
+			<tr>
+				{{#values}}
+				<td>{{value}}</td>
+				{{/values}}
+			</tr>
+			{{/valueRows}}
+		</tbody>
+	</table>
+
+		</script>
+	
+}
+
+
+@navbar = {
+	<li><a href="@routes.Projects.index()">Projekte</a></li>
+}
+
+@main("InterViewer Administration")(content, navbar)

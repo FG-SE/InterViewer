@@ -1,0 +1,223 @@
+@(audioLink: String, project: Project, interview: Interview)
+
+@content = {
+	<!-- GUI-Logic is contained in editor.js using editor namespace.
+       	Call init on startup to initialize event-handlers -->        
+    <script type="text/javascript" src="@routes.Assets.at("javascripts/editor.js")"></script>
+    
+    <script lang="text/javascript">
+					$(document).ready(function() {
+						editor.init();
+					});
+				</script>
+	
+	<!-- Ajax-Routes Configuration. editor.js will search for id "ajaxroutes" -->
+	<div id="ajaxroutes"
+	data-interviewid="@interview.getId()"
+	data-addstatement="@routes.Statements.addStatement()"
+	data-savestatement="@routes.Statements.saveStatement()"
+	data-removestatement="/editor/removeStatement/"
+	</div>
+	
+	<!-- The HTML Content follows... -->
+	
+	<!-- include the audio player template -->
+	@player(audioLink)
+
+	<h2>Aussagen</h2>
+		<div class="btn-group pull-right">
+			<button class="btn btn-primary interviewEdit" href="javascript:;" >
+				<span class="glyphicon glyphicon-edit"></span> Interview Bearbeiten
+			</button>
+			<button class="btn btn-primary" href="javascript:;" id="statementAdd">
+				<span class="glyphicon glyphicon-plus"></span> Neue Aussage
+			</button>
+		</div>
+
+		<table id="statementsTable" class="table table-striped table-hover">
+			<thead>
+				<tr>
+					<th>Zeit</th>
+					<th>Aussage</th>
+					<th>Codes</th>
+					<th>Funktion</th>
+				</tr>
+			</thead>
+			<tbody>
+			@for(statement <- interview.getStatementsSorted()) {
+				<tr class="statementRow uneditableRow" data-statementid="@statement.getId()">
+					<td class="statementTime col-xs-2" data-seconds="@(statement.getTime().toMillis()/1000)">@statement.getTime().toString()</td>
+					<td class="description col-xs-5">@statement.getDescription()</td>
+					<td class="codes col-xs-3">@for(code <- statement.getCodes()) {@code.getName() }</td>
+					<td class="col-xs-3">
+						<div class="btn-group pull-right">
+							<button class="btn btn-default statementEdit" href="javascript:;" data-statementId="@statement.getId()"><span class="glyphicon glyphicon-edit"></span></button>
+							<button class="btn btn-default statementRemove" href="javascript:;" data-statementId="@statement.getId()"><span class="glyphicon glyphicon-trash"></span></button>
+						</div>
+					</td>
+				</tr>
+			}
+			</tbody>
+		</table>
+		
+		<div id="modalContainer"></div>
+		
+	<!-- ... end of regular HTML-content -->
+	
+	<!-- MUSTACHE TEMPLATES FOR RENDERING TABLE ROWS -->
+				
+	<script id="editableRowTemplate" type="text/template">
+		<tr data-statementid="{{statementId}}" class="statementRow editableRow">
+			<td class="col-xs-2">
+				<div class="input-group">
+					<input type="text" class="statementTime form-control timepicker-value" data-seconds="{{statementSeconds}}" value="{{statementTime}}">
+  					<div class="input-group-btn">
+    					<button  type="button" class="btn btn-default timepicker-up"><span class='glyphicon glyphicon-chevron-up'></span></button>
+  						<button type="button" class="btn btn-default timepicker-down"><span class='glyphicon glyphicon-chevron-down'></span></button>
+  					</div>
+				</div>
+			</td>
+			<td class="col-xs-5"><input type="text" class="description form-control" value="{{description}}" autofocus></td>
+			@if(Statements.getCodesViewStyle().equals(Statements.CodesViewManagement.notSupported)) {
+				<td class="col-xs-3">notSupported</td>
+			} else { @if(Statements.getCodesViewStyle().equals(Statements.CodesViewManagement.useCommaSeperated)) {
+				<td class="col-xs-3">
+					<input type="text" class="codes form-control" value="{{#codes}}{{Alias}}, {{/codes}}">
+				</td>
+			} else { @if(Statements.getCodesViewStyle().equals(Statements.CodesViewManagement.useDropDownMenu)) {
+				<!-- Beta implementation of a code dropdown menu -->
+				<td class="codes col-xs-3">
+					<div class="input-group">
+  						<input type="text" class="form-control codeInput" placeholder="{{#codes}}{{Alias}} {{/codes}}">
+  						<div class="input-group-btn">
+  							
+  							<button class="btn btn-default addCode"><span class="glyphicon glyphicon-plus-sign"></span></button> 
+							<button class="btn btn-default" data-toggle="dropdown"><span class="glyphicon glyphicon-arrow-down"></span></button>
+							
+							<!--Dropdown menu with all codes -->
+							<ul class="dropdown-menu pull-right allCodes">
+								<!-- Do this for all codes -->
+								{{#codes}}
+								<li>
+									<a href="javascript:;">
+										<div class="codeValue col-md-1">{{Alias}}</div>
+										
+										<!-- RemoveButton for each code -->
+										<span class="label label-default removeCode pull-right">
+											<span class="glyphicon glyphicon-trash"></span>
+										</span>
+									</a>
+								</li>
+								{{/codes}}				
+							</ul>
+							<!-- End Dropdown menu -->
+							
+  						</div>
+  					<!-- End input-group -->
+  					</div>
+				</td>
+			} else {
+				<td class="codes col-xs-3">Fehler in der Code-Anzeige</td>
+			}}}
+			<td class="col-xs-3">
+				<div class="btn-group pull-right">
+					<button class="btn btn-default statementSave" href="javascript:;" data-statementid="{{statementId}}"><span class="glyphicon glyphicon-ok"></span></button>
+					<button class=" btn btn-default cancelEdit" href="javascript:;" data-statementid="{{statementId}}"><span class="glyphicon glyphicon-remove"></span></button>
+					<button class="btn btn-default statementRemove" href="javascript:;" data-statementid="{{statementId}}"><span class="glyphicon glyphicon-trash"></span></button>
+				</div>
+			</td>
+		</tr>
+	</script>
+	
+	<script id="uneditableRowTemplate" type="text/template">
+		<tr class="statementRow uneditableRow" data-statementid="{{statementId}}">
+			<td class="statementTime col-xs-2" data-seconds="{{statementSeconds}}">{{statementTime}}</td>
+			<td class="description col-xs-5">{{description}}</td>
+			@if(Statements.getCodesViewStyle().equals(Statements.CodesViewManagement.notSupported)) {
+				<td class="codes col-xs-3">
+					{{#codes}}{{Alias}}, {{/codes}}
+				</td>
+			} else { @if(Statements.getCodesViewStyle().equals(Statements.CodesViewManagement.useCommaSeperated)) {
+				<td class="codes col-xs-3">
+					{{#codes}}{{Alias}}, {{/codes}}
+				</td>
+			} else { @if(Statements.getCodesViewStyle().equals(Statements.CodesViewManagement.useDropDownMenu)) {
+				<!-- Beta implementation dropdown menu -->
+				<td class="codes col-xs-3">
+					{{#codes}}{{Alias}} {{/codes}}
+				</td>
+			} else {
+				<td class="codes col-xs-3">Fehler in der Code-Anzeige</td>
+			}}}
+			<td class="col-xs-3">
+				<div class="btn-group pull-right">
+					<button class="btn btn-default statementEdit" href="javascript:;" data-statementid="{{statementId}}"><span class="glyphicon glyphicon-edit"></span></button>
+					<button class="btn btn-default statementRemove" href="javascript:;" data-statementid="{{statementId}}"><span class="glyphicon glyphicon-trash"></span></button>
+				</div>
+			</td>
+		</tr>
+	</script>
+	
+	<script id="interviewEditTemplate" type="text/template">
+<!-- Interview Add Modal -->
+<div class="modal fade" id="interviewEdit">
+	<div class="modal-dialog">
+    	<div class="modal-content">
+      		<div class="modal-header">
+        		<button type="button" class="close" data-dismiss="modal" aria-hidden="true">&times;</button>
+        		<h4 class="modal-title">Interview Bearbeiten</h4>
+      		</div>
+      		<div class="modal-body">
+        		<form id="interviewForm" enctype="multipart/form-data" onsubmit="$('#saveInterview').click(); return false;" class="form-horizontal" role="form">
+					<input type="hidden" name="projectId" value="@(project.getId())"></input>
+					{{#interviewId}}
+						<input type="hidden" name="interviewId" value="{{interviewId}}"></input>
+					{{/interviewId}}
+					<div class="form-group">
+						<label class="col-sm-4 control-label">Interview Name</label>
+							<div class="col-sm-6">
+								<input type="text" name="interviewName" id="interviewName" class="form-control" placeholder="Interviewname" value="{{interviewName}}">
+							</div>
+					</div>
+					<div class="form-group">
+						<label class="col-sm-4 control-label">Audio</label>
+							<div class="col-sm-6">
+								{{^audio}}
+								<input type="file" name="audio" id="audio">
+								{{/audio}}
+								{{#audio}}
+								<p class="help-block">Aktuelle Datei: {{audio}}</p>
+								{{/audio}}
+							</div>
+					</div>
+					
+					<!-- Read all the property types from this project and show for each type an input field-->
+					{{#properties}}
+					<div class="form-group">
+						<label class="col-sm-4 control-label">{{propertyType}}</label>
+							<div class="col-sm-6">
+								<input type="text" name="{{propertyType}}" id="{{propertyType}}" class="propertyType form-control" value="{{value}}">
+							</div>
+					</div>
+					{{/properties}}
+				</form>
+      		</div>
+      		<div class="modal-footer">
+        		<button type="button" class="btn btn-default" data-dismiss="modal">Abbrechen</button>
+        		<button id="saveInterview" type="button" class="btn btn-primary" data-loading-text="uploading...">Speichern</button>
+      		</div>
+		</div>
+    </div>
+</div>
+</script>
+}
+
+
+@navbar = {
+	<li><a href="@routes.Projects.index()">Projekte</a></li>
+	<li><a href="interviews?projectId=@(project.getId())">Interviews</a></li>
+	<li><a href="codes?projectId=@(project.getId())">Codes</a></li>
+	<li class="active">Aussagen-Editor</li>
+}
+
+@main("InterViewer Editor")(content, navbar)

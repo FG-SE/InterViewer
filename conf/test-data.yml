@@ -1,0 +1,166 @@
+# Users
+
+- &tinamuster !!models.User
+    email:      tinamuster@example.com
+    alias:  tina
+    password:   42mkKtC0U7IXqOBv5pzLyE9ou50n68dKXCcLD2C0xwI=
+    admin:  true
+
+- &mariemuster !!models.User
+    email:      mariemuster@example.com
+    alias:  marie
+    password:   42mkKtC0U7IXqOBv5pzLyE9ou50n68dKXCcLD2C0xwI=
+    admin:  true
+
+- &hansmuster !!models.User
+    email:      hansmuster@example.com
+    alias:  hans
+    password:   42mkKtC0U7IXqOBv5pzLyE9ou50n68dKXCcLD2C0xwI=
+    admin:  true
+
+- &maxmuster !!models.User
+    email:      maxmuster@example.com
+    alias:  max
+    password:   42mkKtC0U7IXqOBv5pzLyE9ou50n68dKXCcLD2C0xwI=
+    admin:  false
+
+# Time
+
+- &time1 !!models.Time
+    minutes:  1
+    seconds:  52
+    millis:   3
+
+- &time2 !!models.Time
+    minutes:  2
+    seconds:  45
+    millis:   0
+
+- &time3 !!models.Time
+    minutes:  3
+    seconds:  0
+    millis:   0
+
+- &time4 !!models.Time
+    minutes:  4
+    seconds:  2335
+    millis:   12
+
+- &time5 !!models.Time
+    minutes:  5
+    seconds:  1
+    millis:   4
+
+- &time6 !!models.Time
+    minutes:  6
+    seconds:  55
+    millis:   55
+
+# Code
+
+- &important !!models.Code
+#    name:   Important
+
+- &optional !!models.Code 
+#    name:   Optional
+
+- &question !!models.Code
+#    occurrence:
+#    name:   Question    
+
+# AudioFile
+
+- &audiofile1 !!models.AudioFile
+#    path: audioFile/audio.mp3
+
+- &audiofile2 !!models.AudioFile
+#    path: audioFile/audio2.mp3
+    
+# PropertyType
+
+- &datum !!models.PropertyType
+    name:  Datum
+
+# Statement
+
+- &statement1 !!models.Statement
+    description: Hallo?
+    time:   *time1
+    codes:   
+        - *important
+        - *question
+
+
+- &statement2 !!models.Statement
+    description: Welt
+    time:   *time2
+    codes:   
+        - *optional
+
+- &statement3 !!models.Statement
+    description: Das ist Wichtig
+    time:   *time3
+    codes:   
+        - *important
+
+- &statement4 !!models.Statement
+    description: Wirklich?
+    time:   *time4
+    codes:   
+        - *question
+
+- &statement5 !!models.Statement
+    description: Nein
+    time:   *time5
+
+- &statement6 !!models.Statement
+    description: Ja
+    time:   *time6
+
+# DynamicProperties
+
+- &dynamic1 !!models.DynamicProperty
+    propertyType: *datum
+    value: 30.10.2013
+
+- &dynamic2 !!models.DynamicProperty
+    propertyType: *datum
+    value: 11.11.2013
+        
+# Interview
+
+- &conversation1 !!models.Interview
+    dynamicProperties:
+        - *dynamic1
+    name: Kundengespräch1
+    audio: *audiofile1
+    statements:
+        - *statement1
+        - *statement2
+        - *statement3
+
+- &conversation2 !!models.Interview
+    dynamicProperties:
+        - *dynamic2
+    name:  Kundengespräch2
+    audio:  *audiofile2
+    statements:
+        - *statement4
+        - *statement5
+        - *statement6
+
+# Projects
+
+- &marketing !!models.Project
+    name: Marketing
+    interviews:
+        - *kundengespraech1
+        - *kundengespraech2
+    user:
+        - *tinamuster
+        - *hansmuster
+        - *maxmuster
+    propertyTypes:
+        - *datum
+
+
