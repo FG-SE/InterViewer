@@ -227,6 +227,8 @@ var editor = {
 					var editableRow = Mustache.to_html(
 							$('#editableRowTemplate').html(), data);
 					$("#statementsTable tbody").prepend(editableRow);
+					//the input field has the autofocus attribute, but somehow it doesnt work, so do it manually
+					$("#input-for-" + data.statementId).focus();
 				}
 			}
 		});
