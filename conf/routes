@@ -26,7 +26,7 @@ POST	/projects/deleteProject		controllers.Projects.deleteProject()
 GET		/editor						controllers.Statements.editor()
 GET		/editor/getAudio			controllers.Statements.getAudio()
 POST	/editor/addStatement		controllers.Statements.addStatement()
-GET		/editor/getStatement/:id	controllers.Statements.getStatement(id:String)
+POST	/editor/getStatement/:id	controllers.Statements.getStatement(id:String)
 POST	/editor/removeStatement/:id	controllers.Statements.removeStatement(id:String)
 POST	/editor/saveStatement		controllers.Statements.saveStatement()
 

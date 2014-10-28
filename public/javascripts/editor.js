@@ -294,11 +294,15 @@ var editor = {
 	 * @returns {undefined}
 	 */
 	setRowEditable : function(row) {
-		$.getJSON("/editor/getStatement/" + row.data("statementid"), function(
-				data) {
-			var editableRow = Mustache.to_html(
+		$.ajax({
+			url : "/editor/getStatement/" + row.data("statementid"),
+			type : "POST",
+			dataType: "json",
+			success: function(data) {
+				var editableRow = Mustache.to_html(
 					$('#editableRowTemplate').html(), data);
-			editor.replaceRow(row, editableRow);
+				editor.replaceRow(row, editableRow);
+			}
 		});
 	},
 
@@ -310,11 +314,15 @@ var editor = {
 	 * @returns {undefined}
 	 */
 	setRowUneditable : function(row) {
-		$.getJSON("/editor/getStatement/" + row.data("statementid"), function(
-				data) {
-			var uneditableRow = Mustache.to_html($('#uneditableRowTemplate')
+		$.ajax({
+			url : "/editor/getStatement/" + row.data("statementid"),
+			type : "POST",
+			dataType: "json",
+			success: function(data) {
+				var uneditableRow = Mustache.to_html($('#uneditableRowTemplate')
 					.html(), data);
-			editor.replaceRow(row, uneditableRow);
+				editor.replaceRow(row, uneditableRow);
+			}
 		});
 	},
 

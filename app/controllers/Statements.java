@@ -1,25 +1,24 @@
 package controllers;
 
-import models.Statement;
-import models.Time;
-
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.IOException;
 import java.util.UUID;
 
-import com.fasterxml.jackson.databind.JsonNode;
-
 import models.AudioFile;
 import models.Code;
 import models.Interview;
 import models.Project;
+import models.Statement;
+import models.Time;
 import play.api.libs.MimeTypes;
 import play.data.DynamicForm;
 import play.data.Form;
 import play.mvc.Controller;
 import play.mvc.Result;
-import views.html.*;
+import views.html.editor;
+
+import com.fasterxml.jackson.databind.JsonNode;
 
 /**
  * The statements controller manages all request from the editor view
@@ -34,7 +33,7 @@ public class Statements extends Controller {
 	/**
 	 * There are two ways to support the codes. The codes can be shown as a
 	 * dropdown menu oder comma seperated
-	 * 
+	 *
 	 * @return useCommaSeperated or useDropDownMenu if they will be shown comma
 	 *         seperated or as a dropdown menu. notSupported if the feature is
 	 *         not supported yet.
@@ -45,20 +44,21 @@ public class Statements extends Controller {
 
 	/**
 	 * Render the editor with all statements of the corresponding interview.
-	 * 
+	 *
 	 * @return the rendered editor
 	 */
 	public static Result editor() {
-		if (!Logins.isLoggedIn())
+		if (!Logins.isLoggedIn()) {
 			return redirect(routes.Logins.login());
+		}
 
-		DynamicForm form = Form.form().bindFromRequest();
-		String interviewId = form.get("interviewId");
+		final DynamicForm form = Form.form().bindFromRequest();
+		final String interviewId = form.get("interviewId");
 		try {
 			if (interviewId == null) {
 				return badRequest("Es wurde kein Interview ausgewählt.");
 			}
-		} catch (IllegalArgumentException e) {
+		} catch (final IllegalArgumentException e) {
 			return badRequest("Das Interview mit der ID '" + interviewId
 					+ "' konnte nicht gefunden werden.");
 		}
@@ -66,7 +66,7 @@ public class Statements extends Controller {
 		UUID uuid;
 		try {
 			uuid = UUID.fromString(interviewId);
-		} catch (IllegalArgumentException e) {
+		} catch (final IllegalArgumentException e) {
 			return badRequest("Die gegebene ID kann keinem Interview zugeordnet werden.");
 		}
 
@@ -75,7 +75,7 @@ public class Statements extends Controller {
 					+ "' ist keine korrekte ID eines Interviews");
 		}
 
-		Interview interview = Interview.getInterview(uuid);
+		final Interview interview = Interview.getInterview(uuid);
 
 		if (interview == null) {
 			return badRequest("Das Interview mit der gebebenen ID '"
@@ -87,39 +87,40 @@ public class Statements extends Controller {
 			return badRequest("Sie besitzen nicht die Berechtigung dieses Interview zu bearbeiten.");
 		}
 
-		AudioFile audio = interview.getAudio();
+		final AudioFile audio = interview.getAudio();
 		if (audio == null) {
 			return badRequest("Es existiert keine Audio Datei zum Interview '"
 					+ interviewId + "'");
 		}
-		Project project = Interview.getInterview(UUID.fromString(interviewId))
+		final Project project = Interview.getInterview(UUID.fromString(interviewId))
 				.getProject();
 		return ok(editor.render(interviewId, project, interview));
 	}
 
 	/**
 	 * Send the whole audio file or only a range of bytes of the file.
-	 * 
+	 *
 	 * @return audio data or error message
 	 * @throws IOException
 	 */
 	public static Result getAudio() throws IOException {
-		if (!Logins.isLoggedIn())
+		if (!Logins.isLoggedIn()) {
 			return redirect(routes.Logins.login());
+		}
 
-		DynamicForm form = Form.form().bindFromRequest();
-		String interviewId = form.get("interviewId");
+		final DynamicForm form = Form.form().bindFromRequest();
+		final String interviewId = form.get("interviewId");
 
 		// Check if the given string is a valid UUID
 		UUID uuid;
 		try {
 			uuid = UUID.fromString(interviewId);
-		} catch (IllegalArgumentException e) {
+		} catch (final IllegalArgumentException e) {
 			return badRequest("Die gegebene ID ist nicht korrekt.");
 		}
 
 		// Check if the given uuid corresponds to an interview
-		Interview interview = Interview.getInterview(uuid);
+		final Interview interview = Interview.getInterview(uuid);
 		if (interview == null) {
 			return badRequest("Die gegebene ID kann keinem Interview zugeordnet werden.");
 		} else {
@@ -127,7 +128,7 @@ public class Statements extends Controller {
 			// Check if the user has the right (member of the project) to
 			// retrieve the audio file
 			if (interview.getProject().findUser(Logins.getLoggedInUser())) {
-				AudioFile audio = interview.getAudio();
+				final AudioFile audio = interview.getAudio();
 
 				// Check if the interview has an audio file
 				if (interview.getAudio() == null) {
@@ -138,21 +139,21 @@ public class Statements extends Controller {
 				}
 
 				// get File to return
-				File file = audio.getFile();
+				final File file = audio.getFile();
 
 				// streaming if required
-				String rangeheader = request().getHeader(RANGE);
+				final String rangeheader = request().getHeader(RANGE);
 				if (rangeheader != null) {
 
-					String[] split = rangeheader.substring("bytes=".length())
+					final String[] split = rangeheader.substring("bytes=".length())
 							.split("-");
 					if (split.length == 1) {
-						long start = Long.parseLong(split[0]);
-						long end = file.length() - 1l;
+						final long start = Long.parseLong(split[0]);
+						final long end = file.length() - 1l;
 						return stream(start, end, file);
 					} else {
-						long start = Long.parseLong(split[0]);
-						long end = Long.parseLong(split[1]);
+						final long start = Long.parseLong(split[0]);
+						final long end = Long.parseLong(split[1]);
 						return stream(start, end, file);
 					}
 
@@ -173,9 +174,9 @@ public class Statements extends Controller {
 	// https://gist.github.com/stopher/5495353
 	private static Result stream(long start, long end, File file)
 			throws IOException {
-		int length = (int) ((end - start) + 1l);
-		byte[] buffer = new byte[length];
-		FileInputStream fis = new FileInputStream(file);
+		final int length = (int) ((end - start) + 1l);
+		final byte[] buffer = new byte[length];
+		final FileInputStream fis = new FileInputStream(file);
 		fis.skip(start);
 		fis.read(buffer);
 		fis.close();
@@ -191,44 +192,44 @@ public class Statements extends Controller {
 
 	/**
 	 * Save a statement. The data is reveived as Json.
-	 * 
+	 *
 	 * @return the new statement as Json
 	 */
 	public static Result addStatement() {
-		JsonNode json = request().body().asJson();
+		final JsonNode json = request().body().asJson();
 
 		if (json == null) {
 			return badRequest("Die Eingabe-Daten sind leer.");
 		}
 
-		Interview interview = Interview.getInterview(UUID.fromString(json
+		final Interview interview = Interview.getInterview(UUID.fromString(json
 				.findPath("interviewId").asText()));
-		
+
 		if (!interview.getProject().getUsers()
 				.contains(Logins.getLoggedInUser())) {
 			return badRequest("Sie besitzen nicht die Berechtigung diese Aussage zu erstellen.");
 		}
-		
-		Time time = new Time(json.findPath("statementTime").asText());
-		Statement statement = Statement.createStatement(interview, time, "");
+
+		final Time time = new Time(json.findPath("statementTime").asText());
+		final Statement statement = Statement.createStatement(interview, time, "");
 		return ok(statement.toJSON().toString());
 	}
 
 	/**
 	 * Remove a Statement by id.
-	 * 
+	 *
 	 * @param id
 	 *            the statement id
 	 * @return success or error message
 	 */
 	public static Result removeStatement(String id) {
-		Statement statement = Statement.getStatement(UUID.fromString(id));
-		
+		final Statement statement = Statement.getStatement(UUID.fromString(id));
+
 		if (!statement.getInterview().getProject().getUsers()
 				.contains(Logins.getLoggedInUser())) {
 			return badRequest("Sie besitzen nicht die Berechtigung diese Aussage zu entfernen.");
 		}
-		
+
 		if (Statement.removeStatement(statement)) {
 			return ok();
 		}
@@ -238,40 +239,40 @@ public class Statements extends Controller {
 	/**
 	 * Edit a statement which the data of the received Json. Supports comma
 	 * seperated codes or codes in the Json format.
-	 * 
+	 *
 	 * @return success or error message
 	 */
 	public static Result saveStatement() {
-		JsonNode json = request().body().asJson();
+		final JsonNode json = request().body().asJson();
 
 		if (json == null) {
 			return badRequest("Die Eingabe-Daten sind leer.");
 		}
 
-		Statement statement = Statement.getStatement(UUID.fromString(json
+		final Statement statement = Statement.getStatement(UUID.fromString(json
 				.findPath("statementId").asText()));
-		
+
 		if (!statement.getInterview().getProject().getUsers()
 				.contains(Logins.getLoggedInUser())) {
 			return badRequest("Sie besitzen nicht die Berechtigung diese Aussage zu bearbeiten.");
 		}
-		
+
 		statement.setDescription(json.findPath("description").asText());
 		statement.setTime(new Time(json.findPath("statementTime").asText()));
 
 		if (CODES_VIEW == CodesViewManagement.useCommaSeperated) {
-			String[] codeStrings = json.findPath("codes").asText().split(",");
+			final String[] codeStrings = json.findPath("codes").asText().split(",");
 			statement.removeAllCodes();
-			for (String s : codeStrings) {
+			for (final String s : codeStrings) {
 				if (s != null && !s.trim().equals("")) {
 					statement.addCode(Code.getCodeByName(s.trim()));
 				}
 			}
 		} else if (CODES_VIEW == CodesViewManagement.useDropDownMenu) {
-			JsonNode codes = json.findPath("codes");
+			final JsonNode codes = json.findPath("codes");
 			statement.removeAllCodes();
-			for (JsonNode codeNode : codes) {
-				String codeValue = codeNode.asText();
+			for (final JsonNode codeNode : codes) {
+				final String codeValue = codeNode.asText();
 				statement.addCode(Code.getCodeByName(codeValue));
 			}
 		}
@@ -280,13 +281,13 @@ public class Statements extends Controller {
 
 	/**
 	 * Return a statement by id.
-	 * 
+	 *
 	 * @param id
 	 *            the statement id
 	 * @return
 	 */
 	public static Result getStatement(String id) {
-		Statement statement = Statement.getStatement(UUID.fromString(id));
+		final Statement statement = Statement.getStatement(UUID.fromString(id));
 		return ok(statement.toJSON().toString());
 	}
 }

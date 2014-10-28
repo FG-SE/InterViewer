@@ -430,7 +430,7 @@ var audio = {
 										generalAlert("Die Audio-Datei konnte nicht wiedergegeben werden. M&ouml;glicherweise unterst&uuml;tzt Ihr Browser das Mp3-Dateiformat nicht.");
 										break;
 									case e.target.error.MEDIA_ERR_SRC_NOT_SUPPORTED:
-										generalAlert("Es ist ein Netzwerk-Fehler beim Laden der Audio-Datei aufgetreten.");
+										generalAlert("Die Audio-Quelle wird nicht unterst&uuml;tzt.");
 										break;
 									default:
 										generalAlert('Die Audio-Datei kann nicht wiedergegeben werden.');
