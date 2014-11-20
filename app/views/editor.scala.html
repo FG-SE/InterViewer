@@ -27,7 +27,7 @@
 	<h2>Aussagen</h2>
 		<div class="btn-group pull-right">
 			<button class="btn btn-primary interviewEdit" href="javascript:;" >
-				<span class="glyphicon glyphicon-edit"></span> Interview Bearbeiten
+				<span class="glyphicon glyphicon-edit"></span> Interview bearbeiten
 			</button>
 			<button class="btn btn-primary" href="javascript:;" id="statementAdd">
 				<span class="glyphicon glyphicon-plus"></span> Neue Aussage
@@ -165,7 +165,7 @@
     	<div class="modal-content">
       		<div class="modal-header">
         		<button type="button" class="close" data-dismiss="modal" aria-hidden="true">&times;</button>
-        		<h4 class="modal-title">Interview Bearbeiten</h4>
+        		<h4 class="modal-title">Interview bearbeiten</h4>
       		</div>
       		<div class="modal-body">
         		<form id="interviewForm" enctype="multipart/form-data" onsubmit="$('#saveInterview').click(); return false;" class="form-horizontal" role="form">
@@ -174,7 +174,7 @@
 						<input type="hidden" name="interviewId" value="{{interviewId}}"></input>
 					{{/interviewId}}
 					<div class="form-group">
-						<label class="col-sm-4 control-label">Interview Name</label>
+						<label class="col-sm-4 control-label">Interviewname</label>
 							<div class="col-sm-6">
 								<input type="text" name="interviewName" id="interviewName" class="form-control" placeholder="Interviewname" value="{{interviewName}}">
 							</div>
