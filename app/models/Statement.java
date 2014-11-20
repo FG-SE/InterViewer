@@ -1,7 +1,9 @@
 package models;
 
 import java.util.ArrayList;
+import java.util.LinkedHashSet;
 import java.util.List;
+import java.util.Set;
 import java.util.UUID;
 
 import javax.persistence.CascadeType;
@@ -14,11 +16,11 @@ import javax.persistence.OneToOne;
 import org.json.JSONException;
 import org.json.JSONStringer;
 
+import play.data.validation.Constraints;
 import play.db.ebean.Model;
-import play.data.validation.*;
 
 /**
- * 
+ *
  * @author Thiemo
  * @author Benedikt
  */
@@ -47,7 +49,7 @@ public class Statement extends Model {
 
 	@Constraints.Required
 	@ManyToOne(cascade = CascadeType.REFRESH)
-	private Interview interview;
+	private final Interview interview;
 
 	// *************************************************************************
 	// METHODS TO ADRESS DATABASE, CREATE AND DELETE INTERVIEWS
@@ -61,7 +63,7 @@ public class Statement extends Model {
 
 	/**
 	 * Gives all statements from database that match the given project and code.
-	 * 
+	 *
 	 * @param project
 	 *            the parent project of all interviews.
 	 * @param code
@@ -77,7 +79,7 @@ public class Statement extends Model {
 	/**
 	 * Gives all statements from database that have the given parent interview
 	 * and lie between left and right threshold (both inclusive).
-	 * 
+	 *
 	 * @param interview
 	 *            the parent interview.
 	 * @param leftThreshold
@@ -86,10 +88,10 @@ public class Statement extends Model {
 	 */
 	public static List<Statement> findAllStatements(Interview interview,
 			Time leftThreshold, Time rightThreshold) {
-		List<Statement> all = finder.where().eq("interview", interview)
+		final List<Statement> all = finder.where().eq("interview", interview)
 				.findList();
-		List<Statement> result = new ArrayList<Statement>();
-		for (Statement s : all) {
+		final List<Statement> result = new ArrayList<Statement>();
+		for (final Statement s : all) {
 			if (s.getTime().toMillis() >= leftThreshold.toMillis()
 					&& s.getTime().toMillis() <= rightThreshold.toMillis()) {
 				result.add(s);
@@ -101,7 +103,7 @@ public class Statement extends Model {
 
 	/**
 	 * Gives the Statement identified by id.
-	 * 
+	 *
 	 * @param id
 	 * @return the unique statement
 	 */
@@ -118,7 +120,7 @@ public class Statement extends Model {
 		}
 
 		if (codes != null) {
-			for (Code c : codes) {
+			for (final Code c : codes) {
 				if (Code.getCode(c.getId()) == null) {
 					throw new IllegalArgumentException(
 							"Statement creation failed. The Code " + c
@@ -128,7 +130,7 @@ public class Statement extends Model {
 			}
 		}
 
-		Statement newStatement = new Statement(interview, time, description,
+		final Statement newStatement = new Statement(interview, time, description,
 				codes);
 		newStatement.save();
 		return newStatement;
@@ -138,14 +140,15 @@ public class Statement extends Model {
 	public static boolean removeStatement(Statement statement) {
 		if (statement == null
 				|| Statement.getStatement(statement.getId()) == null
-				|| statement.getInterview() == null)
+				|| statement.getInterview() == null) {
 			return false;
+		}
 		// Deletion of references is not needed, cause EBeans will manage this
 		// automatically::
 		// statement.getInterview().removeStatement(statement);
 		try{
 		statement.delete();
-		} catch (RuntimeException e){
+		} catch (final RuntimeException e){
 			return false;
 		}
 		return true;
@@ -157,7 +160,7 @@ public class Statement extends Model {
 
 	/**
 	 * The statement constructor. It expects consistent data!
-	 * 
+	 *
 	 * @param interview
 	 *            - the parent interview
 	 * @param time
@@ -175,7 +178,7 @@ public class Statement extends Model {
 		this.description = description;
 		this.time = time;
 		this.codes = new ArrayList<Code>();
-		for (Code c : codes) {
+		for (final Code c : codes) {
 			this.codes.add(c);
 		}
 	}
@@ -186,42 +189,42 @@ public class Statement extends Model {
 
 	/**
 	 * Gives the id of the statement.
-	 * 
+	 *
 	 * @return id
 	 */
 	public UUID getId() {
-		return id;
+		return this.id;
 	}
 
 	public UUID getParentId() {
-		return interview.getId();
+		return this.interview.getId();
 	}
 
 	public Interview getInterview() {
-		return interview;
+		return this.interview;
 	}
 
 	public String getDescription() {
-		return description;
+		return this.description;
 	}
 
 	public void setDescription(String description) {
 		this.description = description;
-		save();
+		this.save();
 	}
 
 	public Time getTime() {
-		return time;
+		return this.time;
 	}
 
 	public void setTime(Time time) {
 		this.time = time;
-		save();
+		this.save();
 	}
 
 	@Override
 	public String toString() {
-		return getInterview() + getDescription() + getTime();
+		return this.getInterview() + this.getDescription() + this.getTime();
 
 	}
 
@@ -230,43 +233,45 @@ public class Statement extends Model {
 	// *************************************************************************
 
 	public List<Code> getCodes() {
-		return codes;
+		return this.codes;
 	}
 
 	/**
 	 * Adds Codes to the Statement and refreshes the Code_Statement intersection
 	 * table.
-	 * 
+	 *
 	 * @param code
 	 */
 	public void addCode(Code code) {
-		if (codes.contains(code))
+		if (this.codes.contains(code)) {
 			return;
-		codes.add(code);
-		save();
+		}
+		this.codes.add(code);
+		this.save();
 	}
 
 	/**
 	 * Removes Codes from the Statement and refreshes the Code_Statement
 	 * intersection table.
-	 * 
+	 *
 	 * @param code
 	 */
 	public void removeCode(Code code) {
-		if (!codes.contains(code))
+		if (!this.codes.contains(code)) {
 			return;
-		codes.remove(code);
-		save();
+		}
+		this.codes.remove(code);
+		this.save();
 	}
 
 	/**
 	 * Removes all Codes from the Statement and refreshes the Code_Statement
 	 * intersection table.
-	 * 
+	 *
 	 */
 	public void removeAllCodes() {
-		codes = new ArrayList<Code>();
-		save();
+		this.codes = new ArrayList<Code>();
+		this.save();
 	}
 
 	// *************************************************************************
@@ -275,22 +280,22 @@ public class Statement extends Model {
 
 	/**
 	 * Provides functionality to convert statements to JSON.
-	 * 
+	 *
 	 * @return JSONStringer-Object
 	 */
 	public JSONStringer toJSON() {
-		JSONStringer json = new JSONStringer();
+		final JSONStringer json = new JSONStringer();
 
 		try {
-			json.object().key("statementId").value(id);
-			json.key("statementTime").value(time.toString());
-			json.key("statementSeconds").value(time.toMillis()/1000);
-			json.key("description").value(description);
+			json.object().key("statementId").value(this.id);
+			json.key("statementTime").value(this.time.toString());
+			json.key("statementSeconds").value(this.time.toMillis()/1000);
+			json.key("description").value(this.description);
 
-			if (codes.size() > 0) {
+			if (this.codes.size() > 0) {
 				json.key("codes").array();
 
-				for (Code c : codes) {
+				for (final Code c : this.codes) {
 					json.object().key("Alias").value(c.getName());
 					json.key("Id").value(c.getId()).endObject();
 				}
@@ -298,12 +303,24 @@ public class Statement extends Model {
 				json.endArray();
 			}
 
+			json.key("missingCodes").array();
+			for (final Code c : this.determineMissingCodes()) {
+				json.object().key("Alias").value(c.getName());
+				json.key("Id").value(c.getId()).endObject();
+			}
+			json.endArray();
+
 			json.endObject();
 			return json;
 
-		} catch (JSONException e) {
-			e.printStackTrace();
-			throw new RuntimeException("Could not create JSON from Statement");
+		} catch (final JSONException e) {
+			throw new RuntimeException("Could not create JSON from Statement", e);
 		}
+	}
+
+	private Set<Code> determineMissingCodes() {
+		final LinkedHashSet<Code> result = new LinkedHashSet<Code>(Code.findAllCodes(this.getInterview().getProject()));
+		result.removeAll(this.codes);
+		return result;
 	}
 }

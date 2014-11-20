@@ -1,19 +1,23 @@
 package models;
 
 import java.util.ArrayList;
+import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.UUID;
 
-import javax.persistence.*;
+import javax.persistence.CascadeType;
+import javax.persistence.Entity;
+import javax.persistence.Id;
+import javax.persistence.ManyToMany;
 
+import play.data.validation.Constraints;
 import play.db.ebean.Model;
-import play.data.validation.*;
 
 /**
  * Codes are set on Statements to further characterize them. They are
  * system-wide unique and support auto-completion. To manage the uniqueness a
  * factory method is used.
- * 
+ *
  * @author Sven
  * @author Thiemo
  * @author Benedikt
@@ -26,7 +30,7 @@ public class Code extends Model {
 	private UUID id;
 
 	@Constraints.Required
-	private String name;
+	private final String name;
 
 	/**
 	 * One Code occurs in many Statements. One Statement has many Codes. This is
@@ -48,7 +52,7 @@ public class Code extends Model {
 	/**
 	 * Gives the Code instances to a specified name. Creates a new object if no
 	 * such code exists.
-	 * 
+	 *
 	 * @param name
 	 *            - the name of the desired code
 	 * @return the project wide unique Code.
@@ -69,23 +73,21 @@ public class Code extends Model {
 	public static List<Code> getAllCodes() {
 		return findAllCodes(null);
 	}
-	
+
 	/**
 	 * Gives all codes saved to the database.
 	 * @return all codes
 	 */
 	public static List<Code> findAllCodes(Project p) {
-		List<Code> result = new ArrayList<Code>();
-		for(Interview i : p.getInterviews()){
-			for(Statement s : i.getStatements()){
-				for(Code c : s.getCodes()){
-					if(!result.contains(c)){
-						result.add(c);
-					}
+		final LinkedHashSet<Code> result = new LinkedHashSet<Code>();
+		for(final Interview i : p.getInterviews()){
+			for(final Statement s : i.getStatements()){
+				for(final Code c : s.getCodes()){
+					result.add(c);
 				}
 			}
 		}
-		return result;
+		return new ArrayList<Code>(result);
 	}
 
 	/**
@@ -103,7 +105,7 @@ public class Code extends Model {
 	/**
 	 * The Constructor for a Code-Object. It takes a name. Be sure that
 	 * this name does not exist in the database yet.
-	 * 
+	 *
 	 * @param name
 	 */
 	private Code(String name) {
@@ -115,33 +117,37 @@ public class Code extends Model {
 	// *************************************************************************
 
 	public UUID getId(){
-		return id;
+		return this.id;
 	}
-	
+
 	public String getName() {
-		return name;
+		return this.name;
 	}
 
 	public List<Statement> getOccurrence() {
-		return occurrence;
+		return this.occurrence;
 	}
-	
+
 	/**
 	 * This Setter is not used externally thus addition and removal of Codes is managed from Statement-side.
 	 */
 	protected void addOccurrence(Statement statement){
-		if(occurrence.contains(statement)) return;
-		occurrence.add(statement);
-		saveManyToManyAssociations("occurrence");
+		if(this.occurrence.contains(statement)) {
+			return;
+		}
+		this.occurrence.add(statement);
+		this.saveManyToManyAssociations("occurrence");
 	}
-	
+
 	/**
 	 * This Setter is not used externally thus addition and removal of Codes is managed from Statement-side.
 	 */
 	protected void deleteOccurrence(Statement statement){
-		if(!occurrence.contains(statement)) return;
-		occurrence.remove(statement);
-		saveManyToManyAssociations("occurrence");
+		if(!this.occurrence.contains(statement)) {
+			return;
+		}
+		this.occurrence.remove(statement);
+		this.saveManyToManyAssociations("occurrence");
 	}
 
 

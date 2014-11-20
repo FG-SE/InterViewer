@@ -141,7 +141,10 @@ var editor = {
 
 		// Initialization of the removeCode buttons
 		$("body").on("click", "span.removeCode", function() {
+			var codeDropdown = $(this).closest(".input-group").find(".allCodes");
+			var codeInput = $(this).closest(".input-group").find(".codeInput");
 			$(this).closest("li").remove();
+			editor.refreshCodeInput(codeDropdown, codeInput);
 		});
 
 		// Initialization of the addCode button
@@ -153,6 +156,18 @@ var editor = {
 							".allCodes");
 					var codeInput = $(this).closest(".input-group").find(
 							".codeInput");
+					editor.addCode(codeDropdown, codeInput);
+				});
+
+		// Initialization of the addKnownCode button
+		$("body").on(
+				"click",
+				"span.addKnownCode",
+				function() {
+					var codeDropdown = $(this).closest(".input-group").find(".allCodes");
+					var codeText = $(this).closest("li").text().trim();
+					var codeInput = $(this).closest(".input-group").find(".codeInput");
+					codeInput.val(codeText);
 					editor.addCode(codeDropdown, codeInput);
 				});
 
@@ -428,11 +443,18 @@ var editor = {
 							+ "<span class='label label-default removeCode pull-right'>"
 							+ "<span class='glyphicon glyphicon-trash'></span>"
 							+ "</span>" + "</a>" + "</li>");
-
-			codeInput.attr("placeholder", codeInput.val() + " "
-					+ codeInput.attr("placeholder"));
-			codeInput.val("");
+							
+			this.refreshCodeInput(codeDropdown, codeInput);
 		}
+	},
+	
+	/**
+	 * Adjusts the placeholder so that it fits the current codes and resets the value of the code input.
+	 */
+	refreshCodeInput : function(codeDropdown, codeInput) {
+		var allCodes = codeDropdown.text().replace(/\s+/g, " ").trim();
+		codeInput.attr("placeholder", allCodes);
+		codeInput.val("");
 	},
 
 	/**

@@ -48,7 +48,7 @@
 				<tr class="statementRow uneditableRow" data-statementid="@statement.getId()">
 					<td class="statementTime col-xs-2" data-seconds="@(statement.getTime().toMillis()/1000)">@statement.getTime().toString()</td>
 					<td class="description col-xs-5">@statement.getDescription()</td>
-					<td class="codes col-xs-3">@for(code <- statement.getCodes()) {@code.getName() }</td>
+					<td class="codes col-xs-3">@for(code <- statement.getCodes()) {@code.getName() <br/>}</td>
 					<td class="col-xs-3">
 						<div class="btn-group pull-right">
 							<button class="btn btn-default statementEdit" href="javascript:;" data-statementId="@statement.getId()"><span class="glyphicon glyphicon-edit"></span></button>
@@ -91,26 +91,47 @@
   						<input type="text" class="form-control codeInput" placeholder="{{#codes}}{{Alias}} {{/codes}}">
   						<div class="input-group-btn">
   							
-  							<button class="btn btn-default addCode"><span class="glyphicon glyphicon-plus-sign"></span></button> 
-							<button class="btn btn-default" data-toggle="dropdown"><span class="glyphicon glyphicon-arrow-down"></span></button>
-							
-							<!--Dropdown menu with all codes -->
-							<ul class="dropdown-menu pull-right allCodes">
-								<!-- Do this for all codes -->
-								{{#codes}}
-								<li>
-									<a href="javascript:;">
-										<div class="codeValue col-md-1">{{Alias}}</div>
-										
-										<!-- RemoveButton for each code -->
-										<span class="label label-default removeCode pull-right">
-											<span class="glyphicon glyphicon-trash"></span>
-										</span>
-									</a>
-								</li>
-								{{/codes}}				
-							</ul>
-							<!-- End Dropdown menu -->
+  							<button class="btn btn-default addCode"><span class="glyphicon glyphicon-plus-sign"></span></button>
+  							
+							<!--Dropdown menu with all codes for statement -->
+							<div class="btn-group">
+								<button class="btn btn-default" data-toggle="dropdown"><span class="glyphicon glyphicon-arrow-down"></span></button>							
+								<ul class="dropdown-menu pull-right allCodes">
+									<!-- Do this for all codes -->
+									{{#codes}}
+									<li>
+										<a href="javascript:;">
+											<div class="codeValue col-md-1">{{Alias}}</div>
+											
+											<!-- RemoveButton for each code -->
+											<span class="label label-default removeCode pull-right">
+												<span class="glyphicon glyphicon-trash"></span>
+											</span>
+										</a>
+									</li>
+									{{/codes}}				
+								</ul>
+							</div>
+
+							<!-- Dropdown menu with all known codes for adding -->
+							<div class="btn-group">
+								<button class="btn btn-default" data-toggle="dropdown"><span class="glyphicon glyphicon-list-alt"></span></button>
+								<ul class="dropdown-menu pull-right allMissingCodes">
+									<!-- Do this for all codes -->
+									{{#missingCodes}}
+									<li>
+										<a href="javascript:;">
+											<div class="codeValue col-md-1">{{Alias}}</div>
+											
+											<!-- AddButton for each code -->
+											<span class="label label-default addKnownCode pull-right">
+												<span class="glyphicon glyphicon-plus-sign"></span>
+											</span>
+										</a>
+									</li>
+									{{/missingCodes}}				
+								</ul>
+							</div>
 							
   						</div>
   					<!-- End input-group -->
@@ -144,7 +165,7 @@
 			} else { @if(Statements.getCodesViewStyle().equals(Statements.CodesViewManagement.useDropDownMenu)) {
 				<!-- Beta implementation dropdown menu -->
 				<td class="codes col-xs-3">
-					{{#codes}}{{Alias}} {{/codes}}
+					{{#codes}}{{Alias}}<br/> {{/codes}}
 				</td>
 			} else {
 				<td class="codes col-xs-3">Fehler in der Code-Anzeige</td>
