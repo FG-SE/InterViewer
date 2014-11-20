@@ -168,27 +168,12 @@ var audio = {
 	 */
 	convertSecToDate : function(seconds) {
 
-		// calculate the number of hours
-		var timeHours = Math.floor(seconds / 3600);
-
-		// format the number of hours
-		if (timeHours <= 0)
-			timeHours = "";
-		else if (timeHours < 10)
-			timeHours = "0" + timeHours + ":";
-		else
-			timeHours += ":";
-
-		// subtract timeHours * 3600 from seconds
-		seconds = seconds % 3600;
-
 		// calculate number of minutes and seconds
 		var timeMinutes = Math.floor(seconds / 60);
 		var timeSeconds = Math.floor(seconds % 60);
 
 		// format as string
-		return timeHours
-				+ ((timeMinutes < 10) ? ("0" + timeMinutes) : timeMinutes)
+		return ((timeMinutes < 10) ? ("0" + timeMinutes) : timeMinutes)
 				+ ":"
 				+ ((timeSeconds < 10) ? ("0" + timeSeconds) : timeSeconds);
 	},
