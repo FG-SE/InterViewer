@@ -6,11 +6,18 @@
  */
 
 /*
- * 32 = space 78 = n 67 = c 13 = return
+ * 32 = space 
+ * 78 = n 
+ * 67 = c 
+ * 13 = return
+ * 83 = s
+ * 70 = f
  */
 var KEY_PLAY_PAUSE = 32;
 var KEY_NEW_STATEMENT = 78;
 var KEY_REWIND = 77;
+var KEY_SLOWER = 83;
+var KEY_FASTER = 70;
 
 /*
  * You can switch shortcut key here.
@@ -103,6 +110,20 @@ var editor = {
 			  if(e.which == KEY_REWIND && shortcutKey(e)) {
 				    e.preventDefault();
 				    audio.returnSec();
+				    return false;
+			  }
+		});
+		$(document).bind('keydown', function(e) {
+			  if(e.which == KEY_SLOWER && shortcutKey(e)) {
+				    e.preventDefault();
+				    audio.slower();
+				    return false;
+			  }
+		});
+		$(document).bind('keydown', function(e) {
+			  if(e.which == KEY_FASTER && shortcutKey(e)) {
+				    e.preventDefault();
+				    audio.faster();
 				    return false;
 			  }
 		});

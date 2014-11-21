@@ -36,13 +36,17 @@ var audio = {
 
 				// if audio is already paused then continue playing audio
 				if (oAudio.paused) {
+				    var oldRate = oAudio.playbackRate;
 					oAudio.play();
+					oAudio.playbackRate = oldRate;
 					$("#playBtn").removeClass("glyphicon-play").addClass(
 							"glyphicon-pause");
 				}
 				// else pause audio
 				else {
+				    var oldRate = oAudio.playbackRate;
 					oAudio.pause();
+					oAudio.playbackRate = oldRate;
 					$("#playBtn").removeClass("glyphicon-pause").addClass(
 							"glyphicon-play");
 				}
@@ -64,7 +68,9 @@ var audio = {
 			try {
 				var oAudio = document.getElementById('interViewerAudio');
 				if (!oAudio.paused) {
+				    var oldRate = oAudio.playbackRate;
 					oAudio.pause();
+					oAudio.playbackRate = oldRate;
 					$("#playBtn").removeClass("glyphicon-pause").addClass(
 							"glyphicon-play");
 				} else
@@ -360,6 +366,18 @@ var audio = {
 														_this.setPlayListener();
 
 													});
+								});
+
+				$("#interViewerAudio")
+						.on(
+								'ratechange',
+								/**
+								 * Update playback rate text when it changes.
+								 */
+								function() {
+									var oAudio = document.getElementById("interViewerAudio");
+									var rateSpan = document.getElementById("playerSpeed");
+									rateSpan.innerHTML = "Rate: " + oAudio.playbackRate;
 								});
 
 				$(".progress").click(
@@ -686,6 +704,38 @@ var audio = {
 
 			} catch (e) {
 				generalAlert("Der Zoom out konnte nicht korrekt durchgeführt werden.");
+				if (window.console && console.error("Error: " + e))
+					;
+			}
+		}
+	},
+	
+	/**
+	 * Decreases the playback rate.
+	 */
+	slower : function() {
+		if (window.HTMLAudioElement) {
+			try {
+				var oAudio = document.getElementById("interViewerAudio");
+				oAudio.playbackRate = Math.round(oAudio.playbackRate * 100 - 5) / 100.0;
+			} catch (e) {
+				generalAlert("Es ist ein Fehler beim Abspielen der Audio-Datei aufgetreten.");
+				if (window.console && console.error("Error: " + e))
+					;
+			}
+		}
+	},
+	
+	/**
+	 * Increases the playback rate.
+	 */
+	faster : function() {
+		if (window.HTMLAudioElement) {
+			try {
+				var oAudio = document.getElementById("interViewerAudio");
+				oAudio.playbackRate = Math.round(oAudio.playbackRate * 100 + 5) / 100.0;
+			} catch (e) {
+				generalAlert("Es ist ein Fehler beim Abspielen der Audio-Datei aufgetreten.");
 				if (window.console && console.error("Error: " + e))
 					;
 			}
