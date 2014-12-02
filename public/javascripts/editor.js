@@ -11,13 +11,13 @@
  * 67 = c 
  * 13 = return
  * 83 = s
- * 70 = f
+ * 68 = d
  */
 var KEY_PLAY_PAUSE = 32;
 var KEY_NEW_STATEMENT = 78;
 var KEY_REWIND = 77;
 var KEY_SLOWER = 83;
-var KEY_FASTER = 70;
+var KEY_FASTER = 68;
 
 /*
  * You can switch shortcut key here.
