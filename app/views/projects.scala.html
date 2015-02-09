@@ -33,6 +33,10 @@
 							<span class="glyphicon glyphicon-export"></span>
 						</button>
 					
+						<button type="button" onClick="location.href='@routes.Projects.exportTranscripts(project.getId().toString())'" title="Transkripte exportieren" class="btn btn-default">
+							<span class="glyphicon glyphicon-compressed"></span>
+						</button>
+					
 						<button type="button" id="projectInfo" onClick="projects.sendShowInfo($(this).closest('tr').attr('id'))" title="Informationen anzeigen" class="btn btn-default">
 							<span class="glyphicon glyphicon-info-sign"></span>
 						</button>

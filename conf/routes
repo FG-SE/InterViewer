@@ -39,6 +39,7 @@ POST	/editInterview				controllers.Interviews.editInterview()
 GET		/codes						controllers.Codes.index()
 
 GET		/exportProject/:id			controllers.Projects.exportProject(id:String)
+GET		/exportTranscripts/:id		controllers.Projects.exportTranscripts(id:String)
 
 # Map static resources from the /public folder to the /assets URL path
 GET     /assets/*file               controllers.Assets.at(path="/public", file)
