@@ -25,7 +25,7 @@ import org.json.JSONException;
 import org.json.JSONWriter;
 
 public class Export {
-	private static final String illegalCharacters = "[^A-Za-z0-9,;:._-]";
+	private static final String illegalCharacters = "[^A-Za-z0-9,; ._-]";
 
 	/**
 	 * Writes all properties of one Project to a File (using JSON). It goes through all objects that are accumulated by the project, too.
@@ -100,7 +100,7 @@ public class Export {
 	}
 
 	private static String makeLegalName(String s) {
-		return s.replaceAll(illegalCharacters, "?");
+		return s.replaceAll(illegalCharacters, "_");
 	}
 
 	private static File fetchFile(File origin, File dest, String name) throws IOException{
@@ -166,11 +166,7 @@ public class Export {
 					zip.write('\r');
 					zip.write('\n');
 				}
-				zip.closeEntry();
 			}
-		} catch (final JSONException e) {
-			e.printStackTrace();
-			throw new RuntimeException("Not able to export transcripts for project "+source.getName()+".", e);
 		} finally {
 			zip.close();
 		}
